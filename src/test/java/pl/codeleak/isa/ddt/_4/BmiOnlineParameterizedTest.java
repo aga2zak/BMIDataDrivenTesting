@@ -3,6 +3,7 @@ package pl.codeleak.isa.ddt._4;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import junitparams.FileParameters;
 import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import junitparams.mappers.CsvWithHeaderMapper;
 import org.junit.After;
 import org.junit.Before;
@@ -44,9 +45,39 @@ public class BmiOnlineParameterizedTest {
         }
     }
 
-
     @Test
-    public void verifiesBmiValue() {
-        // TODO Parameterize the test with csv source
+    @FileParameters(value = "classpath:bmi.csv", mapper = CsvWithHeaderMapper.class)
+    public void verifiesBmiValue(String weight, String height, String expectedResult) {
+        // TODO Open bmi online page
+        driver.get("http://bmi-online.pl/");
+
+        // TODO Get overlay
+        WebElement cookieOverlay = driver.findElement(By.cssSelector(".t-a-c__overlay"));
+
+        // TODO Accept cookies
+        WebElement acceptCookiesButton = driver.findElement(By.cssSelector(".t-a-c__box__btn"));
+        acceptCookiesButton.click();
+
+        // TODO Wait for overlay to be invisible
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.invisibilityOf(cookieOverlay));
+
+        // TODO Set bmi form
+        WebElement weightInput = driver.findElement(By.cssSelector("input[name=weight]"));
+        weightInput.clear();
+        weightInput.sendKeys(weight);
+
+        WebElement heightInput = driver.findElement(By.cssSelector("input[name=height]"));
+        heightInput.clear();
+        heightInput.sendKeys(height);
+
+        // TODO Submit the form and get bmi result page
+        WebElement submit = driver.findElement(By.cssSelector("button[type=submit]"));
+        submit.click();
+
+        // TODO Assert value
+        WebElement resultEl = driver.findElement(By.cssSelector(".result-v1__title > strong:nth-child(1)"));
+
+        assertThat(resultEl.getText()).isEqualTo(expectedResult);
     }
 }

@@ -1,11 +1,19 @@
 package pl.codeleak.isa.ddt._2;
 
+import junitparams.FileParameters;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import junitparams.mappers.CsvWithHeaderMapper;
+import junitparams.naming.TestCaseName;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO Add runner for parameterized tests
+import static org.assertj.core.api.Assertions.assertThat;
+
+@RunWith(JUnitParamsRunner.class)
 public class FizzBuzzParameterizedTest {
 
     FizzBuzz fizzBuzz = new FizzBuzz();
@@ -24,21 +32,38 @@ public class FizzBuzzParameterizedTest {
         params.put(15, "FizzBuzz");
         params.put(30, "FizzBuzz");
 
-        // TODO Test and assert in a loop
+        params.forEach((number, result) -> assertThat(fizzBuzz.calculate(number)).isEqualTo(result));
     }
 
     @Test
-    public void fizzBuzzWithParametersAnnotation() {
-        // TODO Create first parameterized test
+    @TestCaseName("returns {1} when number is {0}")
+    @Parameters({"1,1", "2,2", "3,Fizz", "6,Fizz", "5,Buzz", "10,Buzz", "15,FizzBuzz", "30,FizzBuzz"})
+    public void fizzBuzzWithParametersAnnotation(int number, String result) {
+        assertThat(fizzBuzz.calculate(number)).isEqualTo(result);
     }
 
     @Test
-    public void fizzBuzzWithMethodSource() {
-        // TODO Parameterize the test with a method source
+    @Parameters(method = "fizzBuzzParams")
+    public void fizzBuzzWithMethodSource(int number, String result) {
+        assertThat(fizzBuzz.calculate(number)).isEqualTo(result);
+    }
+
+    private Object[][] fizzBuzzParams() {
+        return new Object[][]{
+                {1, "1"},
+                {2, "2"},
+                {3, "Fizz"},
+                {6, "Fizz"},
+                {5, "Buzz"},
+                {10, "Buzz"},
+                {15, "FizzBuzz"},
+                {30, "FizzBuzz"}
+        };
     }
 
     @Test
-    public void fizzBuzzWitFileSource() {
-        // TODO Parameterize the test with csv source
+    @FileParameters(value = "classpath:fizz-buzz.csv", mapper = CsvWithHeaderMapper.class)
+    public void fizzBuzzWitFileSource(int number, String result) {
+        assertThat(fizzBuzz.calculate(number)).isEqualTo(result);
     }
 }

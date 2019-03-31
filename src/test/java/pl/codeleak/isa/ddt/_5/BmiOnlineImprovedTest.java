@@ -43,9 +43,50 @@ public class BmiOnlineImprovedTest {
         }
     }
 
-
     @Test
-    public void verifiesBmiValue() {
-        // TODO Improve the test by introducing private methods
+    @FileParameters(value = "classpath:bmi.csv", mapper = CsvWithHeaderMapper.class)
+    public void verifiesBmiValue(String weight, String height, String expectedResult) {
+        navigateToBmiPage();
+        acceptCookies();
+        setBmiForm(weight, height);
+        submitForm();
+
+        String bmiResult = getBmiResult();
+        assertThat(bmiResult).isEqualTo(expectedResult);
+    }
+
+    //
+    // Bmi Page API
+    //
+
+    private void navigateToBmiPage() {
+        driver.get("http://bmi-online.pl/");
+    }
+
+    private void acceptCookies() {
+        WebElement cookieOverlay = driver.findElement(By.cssSelector(".t-a-c__overlay"));
+        WebElement acceptCookiesButton = driver.findElement(By.cssSelector(".t-a-c__box__btn"));
+        acceptCookiesButton.click();
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.invisibilityOf(cookieOverlay));
+    }
+
+    private void setBmiForm(String weight, String height) {
+        WebElement weightInput = driver.findElement(By.cssSelector("input[name=weight]"));
+        weightInput.clear();
+        weightInput.sendKeys(weight);
+        WebElement heightInput = driver.findElement(By.cssSelector("input[name=height]"));
+        heightInput.clear();
+        heightInput.sendKeys(height);
+    }
+
+    private void submitForm() {
+        WebElement submit = driver.findElement(By.cssSelector("button[type=submit]"));
+        submit.click();
+    }
+
+    private String getBmiResult() {
+        WebElement resultEl = driver.findElement(By.cssSelector(".result-v1__title > strong:nth-child(1)"));
+        return resultEl.getText();
     }
 }
